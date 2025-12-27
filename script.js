@@ -15,9 +15,10 @@ const Gameboard = (function(){
                     recentlyPlayed=`Player${count}`;
                     --count;
                 }
+                
                 let result=ResultChecker();
+                console.log('"result from the mark function:->" ', result);
                 if(result.result === 'no win'){
-                    console.log('NEXT MOVE');
                     return 'NEXT MOVE';
                 }else if(['1row','2row','3row','1col','2col','3col','1cross','2cross'].includes(result.result) ){
                     console.log(`"${recentlyPlayed} won the game"`);
@@ -37,6 +38,7 @@ const Gameboard = (function(){
         for(let i=0; i<board.length; i++){
             board[i] = '';
         }
+        console.log('reseted!')
     }
 
     function PrecheckFunction(){
@@ -55,6 +57,7 @@ const Gameboard = (function(){
         if(PrecheckFunction()){
 
          result =  HorizontalCheck();
+         //console.log('"returned value from the horuzontalchecker() -> "', result);
                 if(result === '1row'|| result==='2row'|| result==='3row'){
                     let i;
                     if(result === '1row')
@@ -94,61 +97,127 @@ const Gameboard = (function(){
     }
 
     function CrossCheck(){
-        if(board[0]===board[4] && board[4]===board[8]){
-            return '1cross';
-        }else if(board[2]===board[4] && board[4]===board[6]){
-            return '2cross';
-        }else{
-            return 'not cross';
+
+        if(board[0]!==undefined || board[4]!==undefined || board[8]!==undefined){
+            if(board[0]===board[4] && board[4]===board[8]){
+                return '1cross';
+            }
         }
-        
+        if(board[2]!==undefined || board[4]!==undefined || board[6]!==undefined){
+            if(board[2]===board[4] && board[4]===board[6]){
+                return '2cross';
+            }
+        }
+        return 'not cross';
      }
 
     function VerticalCheck(){
+
+        if(board[0]!==undefined || board[3]!==undefined || board[6]!==undefined){
             if(board[0]===board[3] && board[3]===board[6]){
                 return '1col';
-            }else if(board[2]===board[5] && board[5]===board[8]){
-                return '2col';
-            }else if(board[3]===board[6] && board[6]===board[9]){
-                return '3col';
-            }else{
-                return 'not column';
             }
+        }
+        if(board[1]!==undefined || board[4]!==undefined || board[7]!==undefined){
+                if(board[1]===board[4] && board[4]===board[7]){
+                    return '2col';
+                }
+        }
+        if(board[2]!==undefined || board[5]!==undefined || board[8]!==undefined){
+                    if(board[2]===board[5] && board[5]===board[8]){
+                        return '3col';
+                    }
+                }
+        return 'not column';
     }
 
     function HorizontalCheck(){
-           if(board[0]===board[1] && board[1]===board[2]){
+        if(board[0]!==undefined || board[1]!==undefined || board[2]!==undefined){
+            if(board[0]===board[1] && board[1]===board[2]){
                 return '1row';
-            }else if(board[3]===board[4] && board[4]===board[5]){
-                return '2row';
-            }else if(board[6]===board[7] && board[7]===board[8]){
-                return '3row';
-            }else{
-                return 'not row';
             }
+        }
+        if(board[3]!==undefined || board[4]!==undefined || board[5]!==undefined){
+                if(board[3]===board[4] && board[4]===board[5]){
+                    return '2row';
+                }
+        }
+        if(board[6]!==undefined || board[7]!==undefined || board[8]!==undefined){
+                    if(board[6]===board[7] && board[7]===board[8]){
+                        return '3row';
+                    }
+                }
+        return 'not row'
     }
+       
 
     return {mark, getboard, reset, ResultChecker};
-}
-)();
-//FACTORY FUNCTION  ..... 
+})();
 
+//FACTORY FUNCTION  ..... 
+ let result;
 function player(name, symbol){
-    let result;
+   
     function move(index){
         result=Gameboard.mark(index, symbol);
+        if(result=== 'Player1 won the game' || 'Player2 won the game'){
+            domWinBanner(result);
+        }else{
+            domWinBanner(result);
+        }
         console.log(Gameboard.getboard());
     }
     return {name,symbol,move,result};
 }
 
+
+function domWinBanner(result){
+ winbanner.textContent=result;
+ console.log('"After the win , array -> "',Gameboard.getboard());
+ //Gameboard.reset();
+}
+
 const player1 = player('ram', 'X');
 const player2 = player('sam', 'O');
 
-player1.move(0);
-player2.move(4);
-player1.move(1);
-player2.move(2);
-player1.move(6);
-player2.move(5);
-player1.move(3);
+
+// REFERENCE SECTION ....
+const winbanner = document.querySelector('.banner');
+const maincontainer = document.querySelector('#maincontainer');
+let currentPlayer = 'player1';
+const playerOne = document.querySelector('#player1');
+const playerTwo = document.querySelector('#player2');
+const reset = document.querySelector('#reset');
+console.log(playerOne);
+
+playerOne.addEventListener('click' , function(){
+    currentPlayer = 'player1';
+});
+playerTwo.addEventListener('click' , function(){
+    currentPlayer = 'player2';
+});
+
+reset.addEventListener('click' , function(){
+    Gameboard.reset();
+    for(let i=0; i<9 ; ++i){
+        divtail[i].textContent= '';
+    }
+    winbanner.textContent='Start Game';
+    //winbanner.setAttribute('style', 'background-color:white;');
+})
+
+const divtail=document.querySelectorAll('.tail');
+for(let i=0; i<divtail.length; i++){
+
+divtail[i].addEventListener('click' , function(){
+    if(currentPlayer === 'player1'){
+         divtail[i].textContent = "X";
+         player1.move(i);
+    }
+    else{
+         divtail[i].textContent = "O"; 
+         player2.move(i);
+    }
+        
+});
+}
